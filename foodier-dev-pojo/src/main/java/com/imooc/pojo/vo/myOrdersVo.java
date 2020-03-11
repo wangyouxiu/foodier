@@ -22,6 +22,7 @@ public class myOrdersVo {
     private Integer realPayAmount;
     private Integer postAmount;
     private Integer orderStatus;
+    private Integer isComment;
 
     private List<SubOrderItemsVo> subOrderItemList;
 

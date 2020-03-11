@@ -9,6 +9,7 @@
     <result column="realPayAmount" property="realPayAmount"/>
     <result column="postAmount" property="postAmount"/>
     <result column="orderStatus" property="orderStatus"/>
+    <result column="isComment" property="isComment"/>
     <collection property="subOrderItemList" ofType="com.imooc.pojo.vo.SubOrderItemsVo">
       <result column="itemId" property="itemId"/>
       <result column="itemName" property="itemName" />
@@ -27,6 +28,7 @@
         o.pay_method as payMethod,
         o.real_pay_amount as realPayAmount,
         o.post_amount as postAmount,
+        o.is_comment as isComment,
         os.order_status as orderStatus,
         oi.item_id as itemId,
         oi.item_name as itemName,
