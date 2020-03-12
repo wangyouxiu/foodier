@@ -14,6 +14,7 @@ import com.imooc.pojo.Users;
 import com.imooc.pojo.bo.center.CenterUserBO;
 import com.imooc.pojo.vo.myOrdersVo;
 import com.imooc.service.center.MyOrdersService;
+import com.imooc.service.impl.BaseServiceImpl;
 import com.imooc.utils.PagedGridResult;
 import org.aspectj.weaver.patterns.ExactAnnotationFieldTypePattern;
 import org.springframework.beans.BeanUtils;
@@ -36,7 +37,7 @@ import java.util.Map;
  * @Date 2020/3/2 13:57
  **/
 @Service
-public class MyOrdersServiceImpl implements MyOrdersService {
+public class MyOrdersServiceImpl extends BaseServiceImpl implements MyOrdersService {
 
     @Autowired
     private OrdersMapperCustom ordersMapperCustom;
@@ -108,13 +109,4 @@ public class MyOrdersServiceImpl implements MyOrdersService {
         return result == 1 ? true : false;
     }
 
-    private PagedGridResult setterPagedGrid(List<?> list,Integer page) {
-        PageInfo<?> pageInfo = new PageInfo(list);
-        PagedGridResult grid = new PagedGridResult();
-        grid.setPage(page);
-        grid.setTotal(pageInfo.getPages());
-        grid.setRecords(pageInfo.getTotal());
-        grid.setRows(list);
-        return grid;
-    }
 }

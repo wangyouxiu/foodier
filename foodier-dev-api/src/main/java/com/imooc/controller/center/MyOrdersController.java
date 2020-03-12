@@ -105,17 +105,4 @@ public class MyOrdersController extends BaseController {
         }
         return IMOOCJSONResult.ok();
     }
-
-    /**
-     * 越权校验
-     * @return
-     */
-    private IMOOCJSONResult checkUserOrder(String orderId,String userId){
-        Orders orders = myOrdersService.queryMyOrder(userId, orderId);
-        if (orders == null) {
-            return IMOOCJSONResult.errorMsg("越权访问");
-        }
-        return IMOOCJSONResult.ok(orders);
-    }
-
 }
