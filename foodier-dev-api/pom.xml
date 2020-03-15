@@ -10,6 +10,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>foodier-dev-api</artifactId>
+    <!--打包war  [1]-->
+    <packaging>war</packaging>
 
     <dependencies>
         <dependency>
@@ -27,6 +29,7 @@
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
         </dependency>
+
     </dependencies>
 
 </project>

@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 @Data
 @Component
 @ConfigurationProperties(prefix = "file")
-@PropertySource("classpath:file-upload-dev.properites.properties")
+@PropertySource("classpath:file-upload-prod.properties")
 public class FileUpload {
 
     private String imageUserFaceLocation;

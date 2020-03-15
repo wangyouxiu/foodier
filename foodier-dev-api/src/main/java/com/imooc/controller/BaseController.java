@@ -24,10 +24,10 @@ public class BaseController {
     public static final Integer PAGE_SIZE = 20;
     public static final String FOODIER_SHOPCART = "shopcart";
 
-    /**
+     /**
      * 微信或支付宝支付成功后，订单中心的回调地址
      */
-    String payReturnUrl = "http://iwtt7r.natappfree.cc/orders/notifyMerchantOrderPaid";
+    String payReturnUrl = "http://47.106.230.215:8088/foodie-dev-api/orders/notifyMerchantOrderPaid";
     /**
      * 订单中心创建订单接口
      */

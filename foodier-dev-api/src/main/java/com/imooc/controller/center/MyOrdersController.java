@@ -2,6 +2,7 @@ package com.imooc.controller.center;
 
 import com.imooc.controller.BaseController;
 import com.imooc.pojo.Orders;
+import com.imooc.pojo.vo.OrderStatusCountsVo;
 import com.imooc.service.OrderService;
 import com.imooc.service.center.MyOrdersService;
 import com.imooc.utils.IMOOCJSONResult;
@@ -27,6 +28,35 @@ public class MyOrdersController extends BaseController {
 
     @Autowired
     private MyOrdersService myOrdersService;
+
+
+    @ApiOperation(value = "我的订单状态数量查询",notes = "我的订单状态数量查询",httpMethod = "POST")
+    @PostMapping("/statusCounts")
+    public IMOOCJSONResult statusCounts(
+            @ApiParam(name = "userId", value = "userId", required = true)
+            @RequestParam String userId){
+        if (StringUtils.isBlank(userId)) {
+            return IMOOCJSONResult.errorMsg(null);
+        }
+        OrderStatusCountsVo orderStatusCountsVo= myOrdersService.getOrderStatusCounts(userId);
+        return IMOOCJSONResult.ok(orderStatusCountsVo);
+    }
+
+    @ApiOperation(value = "订单动向查询",notes = "订单动向查询",httpMethod = "POST")
+    @PostMapping("/trend")
+    public IMOOCJSONResult trend(
+            @ApiParam(name = "userId", value = "userId", required = true)
+            @RequestParam String userId,
+            @ApiParam(name = "page", value = "当前页码", required = false)
+            @RequestParam Integer page,
+            @ApiParam(name = "pageSize", value = "每页展示的记录数", required = false)
+            @RequestParam Integer pageSize){
+        if (StringUtils.isBlank(userId)) {
+            return IMOOCJSONResult.errorMsg(null);
+        }
+        PagedGridResult result = myOrdersService.getOrderTrend(userId, page, pageSize);
+        return IMOOCJSONResult.ok(result);
+    }
 
     @ApiOperation(value = "我的订单查询",notes = "我的订单查询",httpMethod = "POST")
     @PostMapping("/query")

@@ -12,6 +12,7 @@ import com.imooc.pojo.OrderStatus;
 import com.imooc.pojo.Orders;
 import com.imooc.pojo.Users;
 import com.imooc.pojo.bo.center.CenterUserBO;
+import com.imooc.pojo.vo.OrderStatusCountsVo;
 import com.imooc.pojo.vo.myOrdersVo;
 import com.imooc.service.center.MyOrdersService;
 import com.imooc.service.impl.BaseServiceImpl;
@@ -107,6 +108,38 @@ public class MyOrdersServiceImpl extends BaseServiceImpl implements MyOrdersServ
                 .andEqualTo("userId", userId);
         int result = ordersMapper.updateByExampleSelective(orders, example);
         return result == 1 ? true : false;
+    }
+
+    @Transactional(propagation = Propagation.SUPPORTS, rollbackFor = Exception.class)
+    @Override
+    public OrderStatusCountsVo getOrderStatusCounts(String userId) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("userId", userId);
+        map.put("orderStatus", OrderStatusEnum.WAIT_PAY.type);
+        int waitPayCount = ordersMapperCustom.getMyOrdersStatusCount(map);
+
+        map.put("orderStatus", OrderStatusEnum.WAIT_DELIVER.type);
+        int waitDeliver = ordersMapperCustom.getMyOrdersStatusCount(map);
+
+        map.put("orderStatus", OrderStatusEnum.WAIT_RECEIVE.type);
+        int waitReceive = ordersMapperCustom.getMyOrdersStatusCount(map);
+
+        map.put("orderStatus", OrderStatusEnum.SUCCESS.type);
+        map.put("isComment", YesOrNo.NO.type);
+        int waitComment = ordersMapperCustom.getMyOrdersStatusCount(map);
+
+        OrderStatusCountsVo orderStatusCountsVo = new OrderStatusCountsVo(waitPayCount, waitDeliver, waitReceive, waitComment);
+        return orderStatusCountsVo;
+    }
+
+    @Transactional(propagation = Propagation.SUPPORTS, rollbackFor = Exception.class)
+    @Override
+    public PagedGridResult getOrderTrend(String userId, Integer page, Integer pageSize) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("userId", userId);
+        PageHelper.startPage(page, pageSize);
+        List<OrderStatus> orderStatuses = ordersMapperCustom.getMyOrderTrend(map);
+        return setterPagedGrid(orderStatuses, page);
     }
 
 }
