@@ -27,7 +27,7 @@ public class BaseController {
      /**
      * 微信或支付宝支付成功后，订单中心的回调地址
      */
-    String payReturnUrl = "http://47.106.230.215:8088/foodie-dev-api/orders/notifyMerchantOrderPaid";
+    String payReturnUrl = "http://api.wangyue.pro/foodier-dev-api/orders/notifyMerchantOrderPaid";
     /**
      * 订单中心创建订单接口
      */
