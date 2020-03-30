@@ -20,11 +20,13 @@ public class BaseController {
     @Autowired
     private MyOrdersService myOrdersService;
 
+    public static final String FOODIE_SHOPCAT = "shopcart";
+
+
     public static final Integer COMMON_PAGE_SIZE = 10;
     public static final Integer PAGE_SIZE = 20;
-    public static final String FOODIER_SHOPCART = "shopcart";
 
-     /**
+    /**
      * 微信或支付宝支付成功后，订单中心的回调地址
      */
     String payReturnUrl = "http://api.wangyue.pro/foodier-dev-api/orders/notifyMerchantOrderPaid";
@@ -37,17 +39,18 @@ public class BaseController {
      * 用户上传头像存储地址
      * E:\work\images\foodier
      */
-    public static final String IMAGE_USER_FACE_LOCATION = "E:"+File.separator+"work"+
-                                                            File.separator+"images"+
-                                                            File.separator+"foodier"+
-                                                            File.separator+"faces";
+    public static final String IMAGE_USER_FACE_LOCATION = "E:" + File.separator + "work" +
+            File.separator + "images" +
+            File.separator + "foodier" +
+            File.separator + "faces";
 
 
     /**
      * 越权校验
+     *
      * @return
      */
-    public IMOOCJSONResult checkUserOrder(String orderId, String userId){
+    public IMOOCJSONResult checkUserOrder(String orderId, String userId) {
         Orders orders = myOrdersService.queryMyOrder(userId, orderId);
         if (orders == null) {
             return IMOOCJSONResult.errorMsg("越权访问");

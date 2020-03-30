@@ -17,7 +17,7 @@ public class ShopcartBO {
     private String itemName;
     private String specId;
     private String specName;
-    private String buyCounts;
+    private Integer buyCounts;
     private String priceDiscount;
     private String priceNormal;
 

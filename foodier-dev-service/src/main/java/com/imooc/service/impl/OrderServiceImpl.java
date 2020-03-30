@@ -7,6 +7,7 @@ import com.imooc.mapper.OrderStatusMapper;
 import com.imooc.mapper.OrdersMapper;
 import com.imooc.mapper.OrdersMapperCustom;
 import com.imooc.pojo.*;
+import com.imooc.pojo.bo.ShopcartBO;
 import com.imooc.pojo.bo.SubmitOrderBO;
 import com.imooc.pojo.vo.MerchantOrdersVO;
 import com.imooc.pojo.vo.OrderVO;
@@ -14,17 +15,15 @@ import com.imooc.service.AddressService;
 import com.imooc.service.ItemService;
 import com.imooc.service.OrderService;
 import com.imooc.utils.DateUtil;
+import com.imooc.utils.RedisOperator;
 import org.n3r.idworker.Sid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import tk.mybatis.mapper.annotation.Order;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @version 1.0
@@ -57,10 +56,13 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private Sid sid;
 
+    @Autowired
+    private RedisOperator redisOperator;
+
 
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     @Override
-    public OrderVO createOrder(SubmitOrderBO submitOrderBO) {
+    public OrderVO createOrder(SubmitOrderBO submitOrderBO, List<ShopcartBO> shopcartBOS) {
 
         String addressId = submitOrderBO.getAddressId();
         String userId = submitOrderBO.getUserId();
@@ -91,13 +93,17 @@ public class OrderServiceImpl implements OrderService {
         Integer totalAmount = 0;
         //优惠后的实际支付价格累计
         Integer realPayAmount = 0;
+        List<ShopcartBO> toBeRemovedShopcatList = new ArrayList<>();
         for (String specId : itemSpecIdList) {
-            //TODO 整合redis之后，商品购买的数量重新从redis购物车中获取
-            int buyCounts = 1;
+            //整合redis之后，商品购买的数量重新从redis购物车中获取
+            AtomicInteger buyCounts = new AtomicInteger(1);
+            ShopcartBO shopcart = getBuyCountsFromShopcart(shopcartBOS, specId);
+            Optional.ofNullable(shopcart).ifPresent(item -> buyCounts.set(item.getBuyCounts()));
+            toBeRemovedShopcatList.add(shopcart);
             //2.1根据规格id获取规格，主要获取价格信息
             ItemsSpec itemSpec = itemService.queryItemSpecById(specId);
-            totalAmount += itemSpec.getPriceNormal() * buyCounts;
-            realPayAmount += itemSpec.getPriceDiscount() * buyCounts;
+            totalAmount += itemSpec.getPriceNormal() * buyCounts.get();
+            realPayAmount += itemSpec.getPriceDiscount() * buyCounts.get();
             //2.2根据商品id，获取商品信息以及图片信息
             String itemId = itemSpec.getItemId();
             Items item = itemService.queryItemById(itemId);
@@ -112,10 +118,10 @@ public class OrderServiceImpl implements OrderService {
             subOrderItems.setItemSpecId(specId);
             subOrderItems.setItemSpecName(itemSpec.getName());
             subOrderItems.setPrice(itemSpec.getPriceDiscount());
-            subOrderItems.setBuyCounts(buyCounts);
+            subOrderItems.setBuyCounts(buyCounts.get());
             orderItemsMapper.insert(subOrderItems);
             //2.4在用户提交订单以后，规格表中需要扣除库存
-            itemService.decreaseItemSpecStock(specId, buyCounts);
+            itemService.decreaseItemSpecStock(specId, buyCounts.get());
         }
         orders.setTotalAmount(totalAmount);
         orders.setRealPayAmount(realPayAmount);
@@ -136,6 +142,7 @@ public class OrderServiceImpl implements OrderService {
         OrderVO orderVO = new OrderVO();
         orderVO.setOrderId(orderId);
         orderVO.setMerchantOrdersVO(merchantOrdersVO);
+        orderVO.setToBeRemovedShopcatList(toBeRemovedShopcatList);
         return orderVO;
     }
 
@@ -182,5 +189,20 @@ public class OrderServiceImpl implements OrderService {
         os.setOrderStatus(OrderStatusEnum.CLOSE.type);
         os.setCloseTime(new Date());
         orderStatusMapper.updateByPrimaryKeySelective(os);
+    }
+
+    /**
+     * 从redis购物车中获取商品，主要是要获取count
+     * @param shopcartBOS
+     * @param specId
+     * @return
+     */
+    private ShopcartBO getBuyCountsFromShopcart(List<ShopcartBO> shopcartBOS,String specId) {
+        for (ShopcartBO sc : shopcartBOS) {
+            if (specId.equals(sc.getSpecId())) {
+                return sc;
+            }
+        }
+        return null;
     }
 }
